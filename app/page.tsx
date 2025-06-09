@@ -141,7 +141,6 @@ export default function MMeastTeamPage() {
       audioContextRef.current = audioContext
 
       // Mission Impossible theme notes (simplified version)
-      // The classic "dun dun da da, dun dun da da" melody
       const notes = [
         { freq: 466.16, duration: 0.25 }, // Bb4
         { freq: 466.16, duration: 0.25 }, // Bb4
@@ -171,9 +170,8 @@ export default function MMeastTeamPage() {
         gainNode.connect(audioContext.destination)
 
         oscillator.frequency.setValueAtTime(note.freq, currentTime)
-        oscillator.type = "triangle" // Gives a more dramatic sound
+        oscillator.type = "triangle"
 
-        // Envelope for each note
         gainNode.gain.setValueAtTime(0, currentTime)
         gainNode.gain.linearRampToValueAtTime(0.1, currentTime + 0.01)
         gainNode.gain.exponentialRampToValueAtTime(0.01, currentTime + note.duration)
@@ -181,9 +179,8 @@ export default function MMeastTeamPage() {
         oscillator.start(currentTime)
         oscillator.stop(currentTime + note.duration)
 
-        currentTime += note.duration + 0.05 // Small gap between notes
+        currentTime += note.duration + 0.05
 
-        // Reset playing flag when the last note ends
         if (index === notes.length - 1) {
           setTimeout(
             () => {

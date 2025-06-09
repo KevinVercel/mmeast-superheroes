@@ -1,7 +1,10 @@
+"use client"
+
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { MapPin, Zap, Shield, Users } from "lucide-react"
 import Image from "next/image"
+import { useRef, useCallback } from "react"
 
 const teamMembers = [
   {
@@ -54,15 +57,15 @@ const teamMembers = [
     alias: "The Strategy Sentinel",
     image: "/images/kevin.png",
     hometown: "Boston, MA",
-    costume: "Classic Navy Tactical Suit with Strategic Planning Visor",
+    costume: "Battle-Scarred Navy Tactical Suit with Quantum Planning Visor",
     powers: [
-      "Future Market Prediction",
-      "Risk Assessment Vision",
-      "Strategic Planning Acceleration",
-      "Competitive Analysis Radar",
+      "Temporal Strategy Sight",
+      "Catastrophic Risk Prevention",
+      "Timeline Manipulation Resistance",
+      "Strategic Sacrifice Calculation",
     ],
-    bio: "Kevin gained his abilities after discovering an ancient business strategy tome in Harvard's library. He can now see multiple timeline outcomes and always knows the perfect strategic move.",
-    color: "from-indigo-600 to-blue-700",
+    bio: "Kevin's powers came at a terrible cost. During a catastrophic client meeting where a competitor's sabotage threatened to destroy three major companies and thousands of jobs, Kevin made the ultimate sacrifice. He absorbed the full force of a temporal strategy bomb meant to erase all business timelines. The explosion should have killed him, but instead, it shattered his perception across infinite realities. Now he experiences every possible failure simultaneously - watching companies collapse, seeing friends lose everything, feeling the weight of every wrong decision across countless timelines. His strategic perfection comes from living through every nightmare scenario in his mind, forever haunted by the disasters only he can prevent.",
+    color: "from-red-900 to-slate-900",
   },
   {
     name: "Carson",
@@ -127,6 +130,91 @@ const teamMembers = [
 ]
 
 export default function MMeastTeamPage() {
+  const audioContextRef = useRef<AudioContext | null>(null)
+  const isPlayingRef = useRef(false)
+
+  const playMissionImpossibleTheme = useCallback(() => {
+    if (isPlayingRef.current) return
+
+    try {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
+      audioContextRef.current = audioContext
+
+      // Mission Impossible theme notes (simplified version)
+      // The classic "dun dun da da, dun dun da da" melody
+      const notes = [
+        { freq: 466.16, duration: 0.25 }, // Bb4
+        { freq: 466.16, duration: 0.25 }, // Bb4
+        { freq: 523.25, duration: 0.15 }, // C5
+        { freq: 587.33, duration: 0.15 }, // D5
+        { freq: 466.16, duration: 0.25 }, // Bb4
+        { freq: 466.16, duration: 0.25 }, // Bb4
+        { freq: 523.25, duration: 0.15 }, // C5
+        { freq: 587.33, duration: 0.15 }, // D5
+        { freq: 466.16, duration: 0.25 }, // Bb4
+        { freq: 466.16, duration: 0.25 }, // Bb4
+        { freq: 523.25, duration: 0.15 }, // C5
+        { freq: 587.33, duration: 0.15 }, // D5
+        { freq: 622.25, duration: 0.3 }, // Eb5
+        { freq: 698.46, duration: 0.3 }, // F5
+        { freq: 783.99, duration: 0.5 }, // G5
+      ]
+
+      let currentTime = audioContext.currentTime
+      isPlayingRef.current = true
+
+      notes.forEach((note, index) => {
+        const oscillator = audioContext.createOscillator()
+        const gainNode = audioContext.createGain()
+
+        oscillator.connect(gainNode)
+        gainNode.connect(audioContext.destination)
+
+        oscillator.frequency.setValueAtTime(note.freq, currentTime)
+        oscillator.type = "triangle" // Gives a more dramatic sound
+
+        // Envelope for each note
+        gainNode.gain.setValueAtTime(0, currentTime)
+        gainNode.gain.linearRampToValueAtTime(0.1, currentTime + 0.01)
+        gainNode.gain.exponentialRampToValueAtTime(0.01, currentTime + note.duration)
+
+        oscillator.start(currentTime)
+        oscillator.stop(currentTime + note.duration)
+
+        currentTime += note.duration + 0.05 // Small gap between notes
+
+        // Reset playing flag when the last note ends
+        if (index === notes.length - 1) {
+          setTimeout(
+            () => {
+              isPlayingRef.current = false
+            },
+            (currentTime - audioContext.currentTime) * 1000,
+          )
+        }
+      })
+    } catch (error) {
+      console.log("Audio playback failed:", error)
+      isPlayingRef.current = false
+    }
+  }, [])
+
+  const stopMissionImpossibleTheme = useCallback(() => {
+    if (audioContextRef.current && audioContextRef.current.state !== "closed") {
+      audioContextRef.current.close()
+      audioContextRef.current = null
+    }
+    isPlayingRef.current = false
+  }, [])
+
+  const handleKevinHover = useCallback(() => {
+    playMissionImpossibleTheme()
+  }, [playMissionImpossibleTheme])
+
+  const handleKevinLeave = useCallback(() => {
+    stopMissionImpossibleTheme()
+  }, [stopMissionImpossibleTheme])
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       {/* Hero Section */}
@@ -173,6 +261,8 @@ export default function MMeastTeamPage() {
             <Card
               key={member.name}
               className="group relative overflow-hidden bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700 hover:border-slate-600 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/20"
+              onMouseEnter={member.name === "Kevin" ? handleKevinHover : undefined}
+              onMouseLeave={member.name === "Kevin" ? handleKevinLeave : undefined}
             >
               <div
                 className={`absolute inset-0 bg-gradient-to-br ${member.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}
